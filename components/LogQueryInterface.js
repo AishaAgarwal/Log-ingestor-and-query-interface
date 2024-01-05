@@ -17,7 +17,7 @@ const LogQueryInterface = ({onLogQuery}) => {
     return (
         <form onSubmit={handleSubmit}>
             <label>
-                Log Query:
+                Query Logs:
                 <input type="text" value={query} onChange={handleInputChange} />
             </label>
             <button type="submit"> Query Logs</button>
