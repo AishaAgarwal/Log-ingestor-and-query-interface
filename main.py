@@ -20,8 +20,9 @@ logging.basicConfig(level=logging.INFO)
 logging.info("Connected to TiDB Cloud successfully.")
 
 class LogIngestPayload(BaseModel):
-    message: str
     log_type: str
+    message: str
+   
 
 class LogQueryPayload(BaseModel):
     log_type: str
@@ -50,12 +51,18 @@ def log_ingest(payload: LogIngestPayload):
         cursor.close()
 
 @app.post("/logQuery")
-def log_query(query: str):
+def log_query(log_type: str):
     try:
-        cursor = connection.cursor()
-        return {"message": f"Query executed: {query}"}
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT * FROM logs WHERE log_type = %s"
+        logging.info(f"Executing query: {query} with parameters: {log_type}")
+        cursor.execute(query, (log_type,))
+        result = cursor.fetchall();
+        logging.info("Log data queried successfully : {result}")
+        return {"logs" : result}
     
     except Exception as e:
+        logging.error(f"Error during log ingestion: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error during log query: {str(e)}")
     
     finally:
